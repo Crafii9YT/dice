@@ -49,16 +49,28 @@ let current = 1;
 drawDice(current);
 
 canvas.addEventListener('click', ()=>{
-  // Animation: kurz durcheinander würfeln
-  let i = 0;
-  const rollInterval = setInterval(()=>{
+  let duration = 600; // gesamte Animationsdauer in ms
+  let start = null;
+  
+  function animateRoll(timestamp){
+    if(!start) start = timestamp;
+    let elapsed = timestamp - start;
+    
+    // Geschwindigkeit: hoch am Anfang, langsamer zum Ende (EaseOut)
+    let speed = Math.max(50, 300*(1 - elapsed/duration));
+    
+    // neue zufällige Zahl anzeigen
     current = Math.floor(Math.random()*6)+1;
     drawDice(current);
-    i++;
-    if(i>=10){ // nach 10 Frames stoppen
-      clearInterval(rollInterval);
+    
+    if(elapsed < duration){
+      setTimeout(()=>{
+        requestAnimationFrame(animateRoll);
+      }, speed);
     }
-  },50); // 50ms pro Frame
+  }
+
+  requestAnimationFrame(animateRoll);
 });
 </script>
 </body>
