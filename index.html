@@ -1,93 +1,59 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <style>
-    body { margin:0; overflow:hidden; background:#ffffff; }
-    canvas { display:block; }
-  </style>
+<meta charset="UTF-8">
+<style>
+  body {
+    margin:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#ffffff;
+  }
+  canvas { display:block; }
+</style>
 </head>
 <body>
-<script type="module">
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+<canvas id="dice" width="200" height="200"></canvas>
+<script>
+const canvas = document.getElementById('dice');
+const ctx = canvas.getContext('2d');
 
-  // Szene und Kamera
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.set(3,3,3);
+function drawDice(num) {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10,10,180,180);
 
-  // Renderer
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
+  ctx.fillStyle = '#000000';
+  const positions = {
+    1:[[100,100]],
+    2:[[60,60],[140,140]],
+    3:[[60,60],[100,100],[140,140]],
+    4:[[60,60],[60,140],[140,60],[140,140]],
+    5:[[60,60],[60,140],[140,60],[140,140],[100,100]],
+    6:[[60,60],[60,100],[60,140],[140,60],[140,100],[140,140]]
+  };
 
-  // Licht
-  const light = new THREE.DirectionalLight(0xffffff,1);
-  light.position.set(5,5,5);
-  scene.add(light);
-  scene.add(new THREE.AmbientLight(0xffffff,0.5));
-
-  // Würfel Geometrie
-  const geometry = new THREE.BoxGeometry(1,1,1);
-
-  // Würfel Materialien: klassischer 6-Seiten Würfel mit Punkten
-  function makeFace(color, dots) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 128; canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = color; ctx.fillRect(0,0,128,128);
-    ctx.fillStyle = 'black';
+  positions[num].forEach(p=>{
     ctx.beginPath();
-    const positions = [
-      [], // 0
-      [[64,64]], //1
-      [[32,32],[96,96]], //2
-      [[32,32],[64,64],[96,96]], //3
-      [[32,32],[32,96],[96,32],[96,96]], //4
-      [[32,32],[32,96],[96,32],[96,96],[64,64]], //5
-      [[32,32],[32,96],[96,32],[96,96],[32,64],[96,64]] //6
-    ];
-    positions[dots].forEach(p=>{
-      ctx.moveTo(p[0],p[1]);
-      ctx.arc(p[0],p[1],8,0,2*Math.PI);
-    });
+    ctx.arc(p[0],p[1],10,0,2*Math.PI);
     ctx.fill();
-    return new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(canvas)});
-  }
-
-  const materials = [
-    makeFace('white',1), // rechts
-    makeFace('white',6), // links
-    makeFace('white',5), // oben
-    makeFace('white',2), // unten
-    makeFace('white',3), // vorne
-    makeFace('white',4), // hinten
-  ];
-
-  const cube = new THREE.Mesh(geometry, materials);
-  scene.add(cube);
-
-  // Resize
-  window.addEventListener('resize',()=> {
-    camera.aspect = window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
   });
+}
 
-  // Animation
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene,camera);
-  }
-  animate();
+// Initial Würfel
+let current = 1;
+drawDice(current);
 
-  // Würfeln bei Klick: random Rotation
-  document.body.addEventListener('click',()=>{
-    cube.rotation.x += Math.PI*(1 + Math.floor(Math.random()*4));
-    cube.rotation.y += Math.PI*(1 + Math.floor(Math.random()*4));
-    cube.rotation.z += Math.PI*(1 + Math.floor(Math.random()*4));
-  });
-
+// Würfeln bei Klick
+canvas.addEventListener('click', ()=>{
+  current = Math.floor(Math.random()*6)+1;
+  drawDice(current);
+});
 </script>
 </body>
 </html>
