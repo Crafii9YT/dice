@@ -20,6 +20,15 @@
 const canvas = document.getElementById('dice');
 const ctx = canvas.getContext('2d');
 
+const positions = {
+  1:[[100,100]],
+  2:[[60,60],[140,140]],
+  3:[[60,60],[100,100],[140,140]],
+  4:[[60,60],[60,140],[140,60],[140,140]],
+  5:[[60,60],[60,140],[140,60],[140,140],[100,100]],
+  6:[[60,60],[60,100],[60,140],[140,60],[140,100],[140,140]]
+};
+
 function drawDice(num) {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.fillStyle = '#ffffff';
@@ -29,15 +38,6 @@ function drawDice(num) {
   ctx.strokeRect(10,10,180,180);
 
   ctx.fillStyle = '#000000';
-  const positions = {
-    1:[[100,100]],
-    2:[[60,60],[140,140]],
-    3:[[60,60],[100,100],[140,140]],
-    4:[[60,60],[60,140],[140,60],[140,140]],
-    5:[[60,60],[60,140],[140,60],[140,140],[100,100]],
-    6:[[60,60],[60,100],[60,140],[140,60],[140,100],[140,140]]
-  };
-
   positions[num].forEach(p=>{
     ctx.beginPath();
     ctx.arc(p[0],p[1],10,0,2*Math.PI);
@@ -45,14 +45,20 @@ function drawDice(num) {
   });
 }
 
-// Initial Würfel
 let current = 1;
 drawDice(current);
 
-// Würfeln bei Klick
 canvas.addEventListener('click', ()=>{
-  current = Math.floor(Math.random()*6)+1;
-  drawDice(current);
+  // Animation: kurz durcheinander würfeln
+  let i = 0;
+  const rollInterval = setInterval(()=>{
+    current = Math.floor(Math.random()*6)+1;
+    drawDice(current);
+    i++;
+    if(i>=10){ // nach 10 Frames stoppen
+      clearInterval(rollInterval);
+    }
+  },50); // 50ms pro Frame
 });
 </script>
 </body>
