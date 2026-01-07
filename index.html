@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    body { margin: 0; overflow: hidden; background: #ffffff; }
-    canvas { display: block; }
+    body { margin:0; overflow:hidden; background:#ffffff; }
+    canvas { display:block; }
   </style>
 </head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.0/build/three.min.js"></script>
-<script>
+<script type="module">
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+
   // Szene und Kamera
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -28,14 +29,41 @@
 
   // Würfel Geometrie
   const geometry = new THREE.BoxGeometry(1,1,1);
+
+  // Würfel Materialien: klassischer 6-Seiten Würfel mit Punkten
+  function makeFace(color, dots) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128; canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = color; ctx.fillRect(0,0,128,128);
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    const positions = [
+      [], // 0
+      [[64,64]], //1
+      [[32,32],[96,96]], //2
+      [[32,32],[64,64],[96,96]], //3
+      [[32,32],[32,96],[96,32],[96,96]], //4
+      [[32,32],[32,96],[96,32],[96,96],[64,64]], //5
+      [[32,32],[32,96],[96,32],[96,96],[32,64],[96,64]] //6
+    ];
+    positions[dots].forEach(p=>{
+      ctx.moveTo(p[0],p[1]);
+      ctx.arc(p[0],p[1],8,0,2*Math.PI);
+    });
+    ctx.fill();
+    return new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(canvas)});
+  }
+
   const materials = [
-    new THREE.MeshStandardMaterial({color:0xff0000}),
-    new THREE.MeshStandardMaterial({color:0x00ff00}),
-    new THREE.MeshStandardMaterial({color:0x0000ff}),
-    new THREE.MeshStandardMaterial({color:0xffff00}),
-    new THREE.MeshStandardMaterial({color:0xff00ff}),
-    new THREE.MeshStandardMaterial({color:0x00ffff})
+    makeFace('white',1), // rechts
+    makeFace('white',6), // links
+    makeFace('white',5), // oben
+    makeFace('white',2), // unten
+    makeFace('white',3), // vorne
+    makeFace('white',4), // hinten
   ];
+
   const cube = new THREE.Mesh(geometry, materials);
   scene.add(cube);
 
@@ -53,13 +81,13 @@
   }
   animate();
 
-  // Würfeln bei Klick
+  // Würfeln bei Klick: random Rotation
   document.body.addEventListener('click',()=>{
-    // Random Rotation
-    cube.rotation.x += Math.PI * (2 + Math.random()*4);
-    cube.rotation.y += Math.PI * (2 + Math.random()*4);
-    cube.rotation.z += Math.PI * (2 + Math.random()*4);
+    cube.rotation.x += Math.PI*(1 + Math.floor(Math.random()*4));
+    cube.rotation.y += Math.PI*(1 + Math.floor(Math.random()*4));
+    cube.rotation.z += Math.PI*(1 + Math.floor(Math.random()*4));
   });
+
 </script>
 </body>
 </html>
